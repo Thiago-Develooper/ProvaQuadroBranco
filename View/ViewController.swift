@@ -231,14 +231,30 @@ final class NewsTableViewCell: UITableViewCell {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.numberOfLines = 3
+        label.font = .systemFont(ofSize: 15, weight: .bold)
+        label.numberOfLines = 2
+        return label
+    }()
+
+    private let authorLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.textColor = .systemBlue
+        label.numberOfLines = 1
+        return label
+    }()
+
+    private let descriptionLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .label
+        label.numberOfLines = 2
         return label
     }()
 
     private let sourceLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.font = .systemFont(ofSize: 11, weight: .medium)
         label.textColor = .secondaryLabel
         return label
     }()
@@ -246,7 +262,7 @@ final class NewsTableViewCell: UITableViewCell {
     private let stack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
-        stack.spacing = 6
+        stack.spacing = 4
         return stack
     }()
 
@@ -263,6 +279,8 @@ final class NewsTableViewCell: UITableViewCell {
         contentView.addSubview(newsImageView)
         contentView.addSubview(stack)
         stack.addArrangedSubview(titleLabel)
+        stack.addArrangedSubview(authorLabel)
+        stack.addArrangedSubview(descriptionLabel)
         stack.addArrangedSubview(sourceLabel)
 
         newsImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -283,6 +301,8 @@ final class NewsTableViewCell: UITableViewCell {
 
     func configure(with article: ArticleEntity) {
         titleLabel.text = article.title
+        authorLabel.text = article.author
+        descriptionLabel.text = article.description
         sourceLabel.text = article.source.name
 
         if let urlString = article.urlToImage, let url = URL(string: urlString) {
