@@ -10,6 +10,8 @@ import UIKit
 @MainActor
 protocol HomeViewControllerProtocol: AnyObject {
     func showPosts(_ posts: [ArticleEntity])
+    func showLoading()
+    func hideLoading()
     func showError(_ error: String)
 }
 
@@ -21,6 +23,57 @@ class ViewController: UIViewController {
     let presenter: PresenterHomeViewProtocol
     let router: RouterProtocol
 
+    // MARK: - Loading
+
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+
+    // MARK: - Error
+
+    private let errorView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.isHidden = true
+        return view
+    }()
+
+    private let errorIconView: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 48, weight: .light)
+        let imageView = UIImageView(image: UIImage(systemName: "wifi.exclamationmark", withConfiguration: config))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.tintColor = .secondaryLabel
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 15, weight: .regular)
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        return label
+    }()
+
+    private lazy var retryButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.title = "Tentar novamente"
+        config.cornerStyle = .capsule
+        config.baseForegroundColor = .white
+        config.baseBackgroundColor = .systemBlue
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
+        return button
+    }()
+
+    // MARK: - Init
+
     init(presenter: PresenterHomeViewProtocol, router: RouterProtocol) {
         self.presenter = presenter
         self.router = router
@@ -31,11 +84,15 @@ class ViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Top Headlines"
         view.backgroundColor = .systemBackground
         setupTableView()
+        setupLoadingView()
+        setupErrorView()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -45,19 +102,18 @@ class ViewController: UIViewController {
         }
     }
 
+    // MARK: - Setup
+
     private func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
         tableView.delegate = self
-
-        tableView.register(NewsTableViewCell.self,
-                           forCellReuseIdentifier: NewsTableViewCell.identifier)
+        tableView.register(NewsTableViewCell.self, forCellReuseIdentifier: NewsTableViewCell.identifier)
         tableView.separatorStyle = .singleLine
         tableView.rowHeight = 200
         tableView.backgroundColor = .systemBackground
 
         view.addSubview(tableView)
-
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -65,19 +121,75 @@ class ViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
+
+    private func setupLoadingView() {
+        view.addSubview(loadingIndicator)
+        NSLayoutConstraint.activate([
+            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+
+    private func setupErrorView() {
+        errorView.addSubview(errorIconView)
+        errorView.addSubview(errorLabel)
+        errorView.addSubview(retryButton)
+        view.addSubview(errorView)
+
+        NSLayoutConstraint.activate([
+            errorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            errorView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            errorView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
+            errorView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32),
+
+            errorIconView.topAnchor.constraint(equalTo: errorView.topAnchor),
+            errorIconView.centerXAnchor.constraint(equalTo: errorView.centerXAnchor),
+            errorIconView.widthAnchor.constraint(equalToConstant: 56),
+            errorIconView.heightAnchor.constraint(equalToConstant: 56),
+
+            errorLabel.topAnchor.constraint(equalTo: errorIconView.bottomAnchor, constant: 16),
+            errorLabel.leadingAnchor.constraint(equalTo: errorView.leadingAnchor),
+            errorLabel.trailingAnchor.constraint(equalTo: errorView.trailingAnchor),
+
+            retryButton.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 24),
+            retryButton.centerXAnchor.constraint(equalTo: errorView.centerXAnchor),
+            retryButton.bottomAnchor.constraint(equalTo: errorView.bottomAnchor)
+        ])
+    }
+
+    @objc private func retryTapped() {
+        Task { await presenter.fetchPosts() }
+    }
 }
+
+// MARK: - HomeViewControllerProtocol
 
 extension ViewController: HomeViewControllerProtocol {
 
+    func showLoading() {
+        errorView.isHidden = true
+        tableView.isHidden = true
+        loadingIndicator.startAnimating()
+    }
+
+    func hideLoading() {
+        loadingIndicator.stopAnimating()
+        tableView.isHidden = false
+    }
+
     func showPosts(_ posts: [ArticleEntity]) {
         self.posts = posts
-        self.tableView.reloadData()
+        tableView.reloadData()
     }
 
     func showError(_ error: String) {
-        print(error)
+        tableView.isHidden = true
+        errorLabel.text = error
+        errorView.isHidden = false
     }
 }
+
+// MARK: - UITableViewDataSource & UITableViewDelegate
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
 
@@ -92,17 +204,17 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         ) as? NewsTableViewCell else {
             return UITableViewCell()
         }
-
         cell.configure(with: posts[indexPath.row])
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let article = posts[indexPath.row]
-        router.pushToDetail(from: self, article: article)
+        router.pushToDetail(from: self, article: posts[indexPath.row])
     }
 }
+
+// MARK: - NewsTableViewCell
 
 final class NewsTableViewCell: UITableViewCell {
 
@@ -150,7 +262,6 @@ final class NewsTableViewCell: UITableViewCell {
     private func setupUI() {
         contentView.addSubview(newsImageView)
         contentView.addSubview(stack)
-
         stack.addArrangedSubview(titleLabel)
         stack.addArrangedSubview(sourceLabel)
 

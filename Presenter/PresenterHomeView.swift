@@ -13,26 +13,24 @@ protocol PresenterHomeViewProtocol: AnyObject {
 }
 
 class PresenterHomeView: PresenterHomeViewProtocol {
-    
+
     var interactor: InteractorHomeViewProtocol
     weak var view: HomeViewControllerProtocol?
-    
+
     init(view: HomeViewControllerProtocol? = nil, interactor: InteractorHomeViewProtocol) {
         self.interactor = interactor
         self.view = view
     }
-    
+
     func fetchPosts() async {
-        
+        view?.showLoading()
         do {
             let response = try await interactor.fetchPost()
-            let posts = response.articles
-            view?.showPosts(posts)
+            view?.hideLoading()
+            view?.showPosts(response.articles)
         } catch {
-            print(error.localizedDescription)
+            view?.hideLoading()
             view?.showError(error.localizedDescription)
         }
     }
-    
-    
 }

@@ -185,8 +185,7 @@ extension DetailViewController: DetailViewControllerProtocol {
         let isoFormatter = ISO8601DateFormatter()
         guard let date = isoFormatter.date(from: dateString) else { return dateString }
         let displayFormatter = DateFormatter()
-        displayFormatter.dateStyle = .medium
-        displayFormatter.timeStyle = .short
+        displayFormatter.dateFormat = "dd/MM/yyyy"
         return displayFormatter.string(from: date)
     }
 }
