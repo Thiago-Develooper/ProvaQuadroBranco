@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/TestesPraticos/TesteVIPERsurpresaSeiro -name \"*.xcodeproj\" -o -name \"*Tests*\" -type d | sort)",
+      "Read(//Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/TestesPraticos/TesteVIPERsurpresaSeiro/**)",
+      "Bash(ls \"/Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/TestesPraticos/\")",
+      "Read(//Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/TestesPraticos//**)",
+      "Bash(find /Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica -name \"*.xcodeproj\" -maxdepth 6 2>/dev/null)",
+      "Read(//Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/**)",
+      "Bash(find /Users/thiagomenezes/Documents -name \"*.xcodeproj\" -maxdepth 8 2>/dev/null)",
+      "Read(//Users/thiagomenezes/Documents/**)",
+      "Bash(find /Users/thiagomenezes -name \"*.xcodeproj\" -maxdepth 10 2>/dev/null | head -10)",
+      "Read(//Users/thiagomenezes/**)",
+      "Bash(gem list *)",
+      "Bash(ruby --version)",
+      "Bash(ruby -e ' *)",
+      "Bash(python3 -c ' *)",
+      "Bash(mkdir -p \"/Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/TestesPraticos/TesteVIPERsurpresaSeiro/TesteVIPERsurpresaSeiroTests\")",
+      "Bash(mv /Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/TestesPraticos/TesteVIPERsurpresaSeiro/TesteVIPERsurpresaSeiro/Tests/VIPERTests.swift /Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/TestesPraticos/TesteVIPERsurpresaSeiro/TesteVIPERsurpresaSeiroTests/VIPERTests.swift)",
+      "Bash(xcodebuild -list -project \"/Users/thiagomenezes/Documents/Laboratory/EstudoEntrevistaTecnica/TestesPraticos/TesteVIPERsurpresaSeiro/TesteVIPERsurpresaSeiro.xcodeproj\")"
+    ]
+  }
+}
